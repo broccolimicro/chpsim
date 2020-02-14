@@ -2,6 +2,8 @@
 
 A simulator for Communicating Hardware Processes.
 
+This project is not yet ready to be used.
+
 ## License
 
 Licensed by Cornell University under GNU GPL v3.

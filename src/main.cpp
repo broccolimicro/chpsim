@@ -332,11 +332,11 @@ int main(int argc, char **argv)
 	configuration config;
 	config.set_working_directory(argv[0]);
 	tokenizer chp_tokens;
-	tokenizer dot_tokens;
+	tokenizer astg_tokens;
 	parse_chp::composition::register_syntax(chp_tokens);
-	parse_dot::graph::register_syntax(dot_tokens);
-	chp_tokens.register_comment<parse::block_comment>();
-	chp_tokens.register_comment<parse::line_comment>();
+	//parse_astg::graph::register_syntax(astg_tokens);
+	chp_tokens.register_token<parse::block_comment>(false);
+	chp_tokens.register_token<parse::line_comment>(false);
 	string sgfilename = "";
 	string pnfilename = "";
 	string egfilename = "";
@@ -417,9 +417,9 @@ int main(int argc, char **argv)
 				format = filename.substr(dot+1);
 			if (format == "chp")
 				config.load(chp_tokens, filename, "");
-			else if (format == "dot")
-				config.load(dot_tokens, filename, "");
-			/*else if (format == "sim")
+			/*else if (format == "astg")
+				config.load(astg_tokens, filename, "");
+			else if (format == "sim")
 			{
 				FILE *seq = fopen(argv[i], "r");
 				char command[256];
@@ -453,24 +453,24 @@ int main(int argc, char **argv)
 		{
 			parse_chp::composition syntax(chp_tokens);
 			cout << syntax.to_string() << endl;
-			g.merge(chp::parallel, import_graph(syntax, v, 0, &chp_tokens, true), !first);
+			g.merge(chp::parallel, import_graph(syntax, v, 0, &chp_tokens, true));
 
 			chp_tokens.increment(false);
 			chp_tokens.expect<parse_chp::composition>();
 			first = false;
 		}
 
-		dot_tokens.increment(false);
-		dot_tokens.expect<parse_dot::graph>();
-		while (dot_tokens.decrement(__FILE__, __LINE__))
+		/*astg_tokens.increment(false);
+		astg_tokens.expect<parse_astg::graph>();
+		while (astg_tokens.decrement(__FILE__, __LINE__))
 		{
-			parse_dot::graph syntax(dot_tokens);
-			g.merge(chp::parallel, import_graph(syntax, v, &dot_tokens, true), !first);
+			parse_astg::graph syntax(astg_tokens);
+			g.merge(chp::parallel, import_graph(syntax, v, &astg_tokens, true), !first);
 
-			dot_tokens.increment(false);
-			dot_tokens.expect<parse_dot::graph>();
+			astg_tokens.increment(false);
+			astg_tokens.expect<parse_astg::graph>();
 			first = false;
-		}
+		}*/
 		//g.reduce();
 		//g.check_variables(v);
 

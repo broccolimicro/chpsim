@@ -1,5 +1,5 @@
 NAME          = chpsim
-DEPEND        = interpret_chp interpret_arithmetic interpret_ucs chp petri arithmetic ucs parse_chp parse_dot parse_expression parse_ucs parse common
+DEPEND        = interpret_chp interpret_arithmetic interpret_ucs chp petri arithmetic ucs parse_chp parse_astg parse_dot parse_expression parse_ucs parse common
 
 SRCDIR        = src
 TESTDIR       = tests

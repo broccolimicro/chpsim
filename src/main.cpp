@@ -334,7 +334,7 @@ int main(int argc, char **argv)
 	tokenizer chp_tokens;
 	tokenizer astg_tokens;
 	parse_chp::composition::register_syntax(chp_tokens);
-	//parse_astg::graph::register_syntax(astg_tokens);
+	parse_astg::graph::register_syntax(astg_tokens);
 	chp_tokens.register_token<parse::block_comment>(false);
 	chp_tokens.register_token<parse::line_comment>(false);
 	string sgfilename = "";
@@ -342,8 +342,6 @@ int main(int argc, char **argv)
 	string egfilename = "";
 	string gfilename = "";
 	vector<chp::term_index> steps;
-
-	bool labels = false;
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -373,53 +371,18 @@ int main(int argc, char **argv)
 				return 1;
 			}
 		}
-		else if (arg == "-eg")
-		{
-			i++;
-			if (i < argc)
-				egfilename = argv[i];
-			else
-			{
-				error("", "expected output filename", __FILE__, __LINE__);
-				return 1;
-			}
-		}
-		else if (arg == "-pn")
-		{
-			i++;
-			if (i < argc)
-				pnfilename = argv[i];
-			else
-			{
-				error("", "expected output filename", __FILE__, __LINE__);
-				return 1;
-			}
-		}
-		else if (arg == "-sg")
-		{
-			i++;
-			if (i < argc)
-				sgfilename = argv[i];
-			else
-			{
-				error("", "expected output filename", __FILE__, __LINE__);
-				return 1;
-			}
-		}
-		else if (arg == "--labels" || arg == "-l")
-			labels = true;
 		else
 		{
 			string filename = argv[i];
-			int dot = filename.find_last_of(".");
+			size_t dot = filename.find_last_of(".");
 			string format = "";
 			if (dot != string::npos)
 				format = filename.substr(dot+1);
 			if (format == "chp")
 				config.load(chp_tokens, filename, "");
-			/*else if (format == "astg")
+			else if (format == "astg")
 				config.load(astg_tokens, filename, "");
-			else if (format == "sim")
+			/*else if (format == "sim")
 			{
 				FILE *seq = fopen(argv[i], "r");
 				char command[256];
@@ -446,73 +409,41 @@ int main(int argc, char **argv)
 		chp::graph g;
 		ucs::variable_set v;
 
-		bool first = true;
 		chp_tokens.increment(false);
 		chp_tokens.expect<parse_chp::composition>();
 		while (chp_tokens.decrement(__FILE__, __LINE__))
 		{
 			parse_chp::composition syntax(chp_tokens);
 			cout << syntax.to_string() << endl;
-			g.merge(chp::parallel, import_graph(syntax, v, 0, &chp_tokens, true));
+			g.merge(chp::parallel, import_chp(syntax, v, 0, &chp_tokens, true));
 
 			chp_tokens.increment(false);
 			chp_tokens.expect<parse_chp::composition>();
-			first = false;
 		}
 
-		/*astg_tokens.increment(false);
+		astg_tokens.increment(false);
 		astg_tokens.expect<parse_astg::graph>();
 		while (astg_tokens.decrement(__FILE__, __LINE__))
 		{
 			parse_astg::graph syntax(astg_tokens);
-			g.merge(chp::parallel, import_graph(syntax, v, &astg_tokens, true), !first);
+			g.merge(chp::parallel, import_chp(syntax, v, &astg_tokens));
 
 			astg_tokens.increment(false);
 			astg_tokens.expect<parse_astg::graph>();
-			first = false;
-		}*/
+		}
 		//g.reduce();
 		//g.check_variables(v);
 
 		if (gfilename != "")
 		{
 			FILE *fout = fopen(gfilename.c_str(), "w");
-			fprintf(fout, "%s", export_graph(g, v, labels).to_string().c_str());
+			fprintf(fout, "%s", export_astg(g, v).to_string().c_str());
 			fclose(fout);
 		}
 
-		/*if (egfilename != "")
-		{
-			g.elaborate(v, true);
 
-			for (int i = 0; i < (int)g.places.size(); i++)
-				g.places[i].predicate.espresso();
-
-			FILE *fout = fopen(egfilename.c_str(), "w");
-			fprintf(fout, "%s", export_graph(g, v, labels).to_string().c_str());
-			fclose(fout);
-		}
-
-		if (pnfilename != "")
-		{
-			chp::graph pn = g.to_petri_net();
-
-			FILE *fout = fopen(pnfilename.c_str(), "w");
-			fprintf(fout, "%s", export_graph(pn, v, labels).to_string().c_str());
-			fclose(fout);
-		}
-
-		if (sgfilename != "")
-		{
-			chp::graph sg = g.to_state_graph(v);
-
-			FILE *fout = fopen(sgfilename.c_str(), "w");
-			fprintf(fout, "%s", export_graph(sg, v, labels).to_string().c_str());
-			fclose(fout);
-		}
-
-		if (sgfilename == "" && pnfilename == "" && egfilename == "" && gfilename == "")
-			real_time(g, v, steps);*/
+		//if (gfilename == "")
+		//	real_time(g, v, steps);
 	}
 
 	complete();
